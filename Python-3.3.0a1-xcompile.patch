@@ -1,0 +1,100 @@
+diff Python-3.3.0a1-orig//configure Python-3.3.0a1/configure
+12346c12346
+<   if test "$cross_compiling" = yes; then :
+---
+>   if test "$cross_compiling" = no; then :
+13765c13765
+<   ac_cv_have_long_long_format=no
+---
+>   ac_cv_have_long_long_format="yes"
+Common subdirectories: Python-3.3.0a1-orig//Doc and Python-3.3.0a1/Doc
+Common subdirectories: Python-3.3.0a1-orig//Grammar and Python-3.3.0a1/Grammar
+Common subdirectories: Python-3.3.0a1-orig//Include and Python-3.3.0a1/Include
+Common subdirectories: Python-3.3.0a1-orig//Lib and Python-3.3.0a1/Lib
+Common subdirectories: Python-3.3.0a1-orig//Mac and Python-3.3.0a1/Mac
+diff Python-3.3.0a1-orig//Makefile.pre.in Python-3.3.0a1/Makefile.pre.in
+439c439
+< 	$(RUNSHARED) ./$(BUILDPYTHON) -SE -m sysconfig --generate-posix-vars
+---
+> 	$(RUNSHARED) ./$(HOSTPYTHON) -SE -m sysconfig --generate-posix-vars
+444,445c444,445
+< 	*s*) $(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' ./$(BUILDPYTHON) -E $(srcdir)/setup.py -q build;; \
+< 	*) $(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' ./$(BUILDPYTHON) -E $(srcdir)/setup.py build;; \
+---
+> 	*s*) $(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' $(HOSTPYTHON) -E $(srcdir)/setup.py -q build;; \
+> 	*) $(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' $(HOSTPYTHON) -E $(srcdir)/setup.py build;; \
+598c598
+< 		$(PGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
+---
+> 		$(HOSTPGEN) $(GRAMMAR_INPUT) $(GRAMMAR_H) $(GRAMMAR_C)
+1175c1175,1176
+< 	$(RUNSHARED) ./$(BUILDPYTHON) -E $(srcdir)/setup.py install \
+---
+> 	CC='$(CC)' LDSHARED='$(BLDSHARED)' LDFLAGS='$(LDFLAGS)' OPT='$(OPT)' CROSS_COMPILE='$(CROSS_COMPILE)' \
+> 	$(RUNSHARED) ./$(HOSTPYTHON) -E $(srcdir)/setup.py install \
+Only in Python-3.3.0a1: Makefile.pre.in.orig
+Common subdirectories: Python-3.3.0a1-orig//Misc and Python-3.3.0a1/Misc
+Common subdirectories: Python-3.3.0a1-orig//Modules and Python-3.3.0a1/Modules
+Common subdirectories: Python-3.3.0a1-orig//Objects and Python-3.3.0a1/Objects
+Common subdirectories: Python-3.3.0a1-orig//Parser and Python-3.3.0a1/Parser
+Common subdirectories: Python-3.3.0a1-orig//PC and Python-3.3.0a1/PC
+Common subdirectories: Python-3.3.0a1-orig//PCbuild and Python-3.3.0a1/PCbuild
+Common subdirectories: Python-3.3.0a1-orig//Python and Python-3.3.0a1/Python
+diff Python-3.3.0a1-orig//setup.py Python-3.3.0a1/setup.py
+323a324,325
+>         if os.environ.get('CROSS_COMPILE_TARGET') == 'yes':
+>             return
+336,356c338,362
+<             self.failed.append(ext.name)
+<             self.announce('*** WARNING: renaming "%s" since importing it'
+<                           ' failed: %s' % (ext.name, why), level=3)
+<             assert not self.inplace
+<             basename, tail = os.path.splitext(ext_filename)
+<             newname = basename + "_failed" + tail
+<             if os.path.exists(newname):
+<                 os.remove(newname)
+<             os.rename(ext_filename, newname)
+< 
+<             # XXX -- This relies on a Vile HACK in
+<             # distutils.command.build_ext.build_extension().  The
+<             # _built_objects attribute is stored there strictly for
+<             # use here.
+<             # If there is a failure, _built_objects may not be there,
+<             # so catch the AttributeError and move on.
+<             try:
+<                 for filename in self._built_objects:
+<                     os.remove(filename)
+<             except AttributeError:
+<                 self.announce('unable to remove files (ignored)')
+---
+>             if os.environ.get('CROSS_COMPILE_TARGET') != "yes":
+>                 self.announce('*** WARNING: renaming "%s" since importing it'
+>                               ' failed: %s' % (ext.name, why), level=3)
+>                 assert not self.inplace
+>                 basename, tail = os.path.splitext(ext_filename)
+>                 newname = basename + "_failed" + tail
+>                 if os.path.exists(newname):
+>                     os.remove(newname)
+>                 os.rename(ext_filename, newname)
+> 
+>                 # XXX -- This relies on a Vile HACK in
+>                 # distutils.command.build_ext.build_extension().  The
+>                 # _built_objects attribute is stored there strictly for
+>                 # use here.
+>                 # If there is a failure, _built_objects may not be there,
+>                 # so catch the AttributeError and move on.
+>                 try:
+>                     for filename in self._built_objects:
+>                         os.remove(filename)
+>                 except AttributeError:
+>                     self.announce('unable to remove files (ignored)')
+>             else:
+>                 self.announce('WARNING: "%s" failed importing, but we leave it '
+>                               'because we are cross-compiling' %
+>                               ext.name)
+1687c1693
+<                 config_args = []
+---
+>                 config_args =  sysconfig.get_config_var("CONFIG_ARGS").split(" ")
+Only in Python-3.3.0a1: setup.py.orig
+Common subdirectories: Python-3.3.0a1-orig//Tools and Python-3.3.0a1/Tools
